@@ -1,1 +1,816 @@
 
+DetailActivity
+package com.game.admin.singlegame;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import android.widget.TextView;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
+public class DetailActivity extends AppCompatActivity {
+
+
+    private InterstitialAd mInterstitialAd;
+    int a=0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_detail);
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // Code to be executed when an ad request fails.
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when the ad is displayed.
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            @Override
+            public void onAdClosed() {
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+                if(a==0) {
+
+                    Intent intent = new Intent(DetailActivity.this, PlayActivity.class);
+                    startActivity(intent);
+
+                }else {
+                    finish();
+                }
+                // Code to be executed when when the interstitial ad is closed.
+            }
+        });
+
+
+
+        TextView tv=(TextView)findViewById(R.id.gamename);
+        tv.setText(Util.name);
+
+
+
+        TextView play=(TextView)findViewById(R.id.play);
+
+        Typeface face=Typeface.createFromAsset(getAssets(),
+                "zorque.ttf");
+
+        tv.setTypeface(face);
+        play.setTypeface(face);
+
+
+        play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                    a=0;
+                }else {
+
+                        Intent intent=new Intent(DetailActivity.this,PlayActivity.class);
+                        startActivity(intent);
+
+
+                }
+
+
+
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+
+
+        final Dialog dialog=new Dialog(DetailActivity.this,android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setContentView(R.layout.ratedialog);
+        TextView yes=(TextView)dialog.findViewById(R.id.yes);
+        Typeface face=Typeface.createFromAsset(getAssets(),
+                "zorque.ttf");
+        yes.setTypeface(face);
+
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                }
+
+            }
+        });
+        TextView no=(TextView)dialog.findViewById(R.id.no);
+        no.setTypeface(face);
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                    a=1;
+                }else{
+
+                finish();
+                }
+            }
+        });
+
+
+        dialog.show();
+
+
+    }
+
+}
+-------------------------------------------------------------------------------------------------------
+PlayActivity
+package com.game.admin.singlegame;
+
+import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.Window;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.TextView;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class PlayActivity extends AppCompatActivity {
+
+    WebView wv;
+    String TAG="DATA";
+    boolean loadingFinished = true;
+    boolean redirect = false;
+    Util util;
+
+    private InterstitialAd mInterstitialAd;
+    int a=0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_play); mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // Code to be executed when an ad request fails.
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when the ad is displayed.
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            @Override
+            public void onAdClosed() {
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                if (a==1){
+                    finish();
+                }
+            }
+        });
+        util=new Util(PlayActivity.this);
+        wv = (WebView) findViewById(R.id.webview);
+        WebSettings ws = wv.getSettings();
+
+        ws.setJavaScriptEnabled(true);
+        ws.setAllowFileAccess(true);
+        ws.setDomStorageEnabled(true);
+
+
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.ECLAIR) {
+            try {
+                Log.d(TAG, "Enabling HTML5-Features");
+                Method m1 = WebSettings.class.getMethod("setDomStorageEnabled", new Class[]{Boolean.TYPE});
+                m1.invoke(ws, Boolean.TRUE);
+
+                Method m2 = WebSettings.class.getMethod("setDatabaseEnabled", new Class[]{Boolean.TYPE});
+                m2.invoke(ws, Boolean.TRUE);
+
+                Method m3 = WebSettings.class.getMethod("setDatabasePath", new Class[]{String.class});
+                m3.invoke(ws, "/data/data/" + getPackageName() + "/databases/");
+
+                Method m4 = WebSettings.class.getMethod("setAppCacheMaxSize", new Class[]{Long.TYPE});
+                m4.invoke(ws, 1024*1024*8);
+
+                Method m5 = WebSettings.class.getMethod("setAppCachePath", new Class[]{String.class});
+                m5.invoke(ws, "/data/data/" + getPackageName() + "/cache/");
+
+                Method m6 = WebSettings.class.getMethod("setAppCacheEnabled", new Class[]{Boolean.TYPE});
+                m6.invoke(ws, Boolean.TRUE);
+
+                Log.d(TAG, "Enabled HTML5-Features");
+            }
+            catch (NoSuchMethodException e) {
+                Log.e(TAG, "Reflection fail", e);
+            }
+            catch (InvocationTargetException e) {
+                Log.e(TAG, "Reflection fail", e);
+            }
+            catch (IllegalAccessException e) {
+                Log.e(TAG, "Reflection fail", e);
+            }
+        }
+
+        wv.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public boolean shouldOverrideUrlLoading(
+                    WebView view, WebResourceRequest request) {
+                if (!loadingFinished) {
+                    redirect = true;
+                }
+
+                loadingFinished = false;
+                view.loadUrl(request.getUrl().toString());
+                return true;
+            }
+
+            @Override
+            public void onPageStarted(
+                    WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                loadingFinished = false;
+
+                util.showDialog(Util.name);
+
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if(!redirect){
+                    loadingFinished = true;
+                }
+
+                if(loadingFinished && !redirect){
+                    // Toast.makeText(PlayActivity.this,"finish", Toast.LENGTH_SHORT).show();
+                    //HIDE LOADING IT HAS FINISHED
+                    util.offDialog();
+                    if (mInterstitialAd.isLoaded()) {
+                        a=0;
+                        mInterstitialAd.show();
+                    }
+                } else{
+                    redirect = false;
+                }
+            }
+        });
+
+
+        wv.loadUrl(Util.url);
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+
+        final Dialog dialog=new Dialog(PlayActivity.this,android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setContentView(R.layout.closedialog);
+        TextView tt=(TextView)dialog.findViewById(R.id.name);
+
+        TextView yes=(TextView)dialog.findViewById(R.id.yes);
+        Typeface face=Typeface.createFromAsset(getAssets(),
+                "zorque.ttf");
+        tt.setTypeface(face);
+        yes.setTypeface(face);
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                if (mInterstitialAd.isLoaded()) {
+                    a=1;
+                    mInterstitialAd.show();
+                }else {
+                    finish();
+                }
+            }
+        });
+        TextView no=(TextView)dialog.findViewById(R.id.no);
+        no.setTypeface(face);
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                if (mInterstitialAd.isLoaded()) {
+                    a=0;
+                    mInterstitialAd.show();
+                }
+            }
+        });
+
+
+        dialog.show();
+
+
+    }
+}
+-----------------------------------------------------------------------------------------------
+SplashActivity
+package com.game.admin.singlegame;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.CountDownTimer;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.Toast;
+
+public class SplashActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
+
+
+
+
+        new CountDownTimer(3000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            public void onFinish() {
+
+                if(isNetworkAvailable()) {
+                    Intent intent = new Intent(SplashActivity.this, DetailActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }else {
+                    Toast.makeText(SplashActivity.this,"Please check your internet connection and try again",  Toast.LENGTH_LONG).show();
+                }
+            }
+        }.start();
+
+
+
+    }
+
+
+
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------
+Util
+package com.game.admin.singlegame;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.Typeface;
+import android.view.Window;
+import android.widget.TextView;
+
+/**
+ * Created by admin on 11/21/2017.
+ */
+
+public class Util {
+
+
+    Dialog dialog;
+    Context context;
+    int a=0;
+
+    static  String name ="Glow Hockey Online";
+    static  String url ="https://www.yiv.com/games/Glow-Hockey-Online/index.html";
+
+
+
+    public Util(Context context) {
+        this.context =context;
+    }
+
+
+
+
+    void showDialog(String name){
+        if(a==0) {
+        dialog=new Dialog(context,android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog);
+        TextView tv=(TextView)dialog.findViewById(R.id.name);
+        Typeface face=Typeface.createFromAsset(context.getAssets(),
+                "zorque.ttf");
+        TextView gamename=(TextView)dialog.findViewById(R.id.gamename);
+            gamename.setText(name);
+        tv.setTypeface(face);
+        gamename.setTypeface(face);
+
+            dialog.show();
+            a=1;
+        }
+    }
+
+    void  offDialog(){
+        a=0;
+        dialog.dismiss();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------
+activity_detail
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:gravity="center_horizontal"
+   >
+
+    <RelativeLayout
+
+        android:background="@drawable/gulabi"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+
+        android:id="@+id/relativeLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+
+
+        <TextView
+            android:lines="2"
+            android:id="@+id/gamename"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:text="BB TEN "
+            android:textColor="@color/white"
+            android:textSize="32dp"
+
+
+            />
+
+        <ImageView
+            android:padding="5dp"
+
+            android:id="@+id/name"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/title"
+            android:gravity="center"
+
+
+            android:layout_marginTop="40dp"
+            android:layout_alignTop="@+id/gamename"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+
+
+
+        <TextView
+            android:id="@+id/play"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn"
+            android:gravity="center"
+            android:text="START"
+            android:textColor="#ffffff"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:layout_marginBottom="51dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+
+
+
+
+
+
+</RelativeLayout>
+------------------------------------------------------------------------------------------------
+activity_play
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   >
+
+    <WebView
+        android:background="#000000"
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>
+------------------------------------------------------------------------------------------------
+activity_splash
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background2"
+    tools:context="com.game.admin.myapplication.SplashActivity">
+
+    <ImageView
+        android:src="@drawable/title"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
+------------------------------------------------------------------------------------------------
+closedialog
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+   android:paddingRight="30dp"
+    android:paddingLeft="30dp"
+
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+              android:padding="50dp"
+android:background="@drawable/bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+       >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+
+        <TextView
+            android:padding="10dp"
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:gravity="center"
+            android:text="Are you sure you want to close the game ?"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_marginTop="30dp"
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="20dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/no"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_below="@+id/gamename"
+                    android:background="@drawable/btn"
+android:layout_marginRight="20dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="NO"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <TextView
+
+                    android:id="@+id/yes"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_below="@+id/gamename"
+                    android:background="@drawable/btn"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="YES"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>
+-----------------------------------------------------------------------------------------------
+dialog
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:background="@drawable/background2"
+    android:layout_gravity="center_vertical"
+    android:gravity="center"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/gamename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:text="BB TEN "
+        android:textColor="#ffffff"
+        android:textSize="28dp"
+        />
+
+    <TextView
+        android:layout_below="@+id/gamename"
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+android:layout_marginTop="10dp"
+       android:textStyle="bold"
+        android:gravity="center"
+        android:text="TINY GAMES"
+        android:textColor="#ffffff"
+        android:textSize="22dp"
+        />
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:layout_marginTop="28dp"
+
+        android:id="@+id/spin_kit"
+        style="@style/SpinKitView.FoldingCube"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:SpinKit_Color="@color/white"
+        android:layout_below="@+id/name"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
+-----------------------------------------------------------------------------------------------
+ratedialog
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:paddingRight="30dp"
+    android:paddingLeft="30dp"
+
+    android:layout_height="match_parent">
+
+
+
+
+        <RelativeLayout
+            android:background="@drawable/fivestar"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_centerVertical="true"
+           >
+
+
+            <LinearLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="30dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginRight="60dp"
+                android:layout_marginLeft="60dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/no"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/gamename"
+                    android:layout_marginRight="15dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/btn"
+                    android:gravity="center"
+                    android:text="CLOSE"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/yes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/gamename"
+                    android:layout_weight="1"
+
+                    android:background="@drawable/btn"
+                    android:gravity="center"
+                    android:text="RATE"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+
+
+
+</RelativeLayout>
+=======================================================================================================
